@@ -4,7 +4,7 @@ class UserController {
     searchUser = async (req, res) => {
         try {
             const query = req.query.search; 
-            const userId = req.user._id;   
+            const userEmail = req.user.email;   
 
             if (!query) {
                 return res.status(400).json({
@@ -13,7 +13,7 @@ class UserController {
                 });
             }
 
-            const response = await UserService.searchUserByUsername(query, userId);
+            const response = await UserService.searchUserByUsername(query, userEmail);
             res.status(200).json(response);
         } catch (error) {
             res.status(400).json({

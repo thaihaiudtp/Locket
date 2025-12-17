@@ -1,8 +1,8 @@
 const User = require('../model/User');
 class UserService {
-    searchUserByUsername = async (username, currentUserId) => {
+    searchUserByUsername = async (username, userEmail) => {
         const users = await User.find({
-            _id: { $ne: currentUserId }, 
+            email: { $ne: userEmail }, 
             username: { $regex: username, $options: 'i' }
         })
         .select('username email'); // không trả password

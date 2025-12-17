@@ -23,5 +23,42 @@ class PictureService {
             data: newPicture
         };
     }
+    listPictures = async (request, page, limit) => {
+        const email = request.email;
+        const skip = (page - 1) * limit;
+
+        const user = await User.findOne({ email: email }).select('friends');
+        if (!user) {
+            return {
+                success: false,
+                message: 'User not found'
+            };
+        }
+        const friendIds = user.friends;
+        const uploaderIds = [user._id, ...friendIds];
+        const [pictures, total] = await Promise.all([
+            Picture.find({ uploader: { $in: uploaderIds } })
+                .select('url uploader') // chỉ lấy field cần
+                .populate('uploader', 'username') 
+                .sort({ createdAt: -1 })
+                .skip(skip)
+                .limit(limit)
+                .lean(),
+
+            Picture.countDocuments({ uploader: { $in: uploaderIds } })
+        ]);
+
+        return {
+            success: true,
+            message: 'Pictures retrieved successfully',
+            meta: {
+                total,
+                page,
+                limit,
+                totalPages: Math.ceil(total / limit)
+            },
+            data: pictures,
+        };
+    }
 }
 module.exports = new PictureService();

@@ -10,6 +10,17 @@ class PictureController {
             res.status(400).json({success: false, message: error.message});
         }
     }
+    listPictures = async(req, res) => {
+        const userDecoded = req.user;
+        const page = req.query.page;
+        const limit = req.query.limit;
+        try {
+            const response = await PictureService.listPictures(userDecoded, page, limit);
+            res.status(200).json(response);
+        } catch (error) {
+            res.status(400).json({success: false, message: error.message});
+        }
+    }
 }
 
 module.exports = new PictureController();

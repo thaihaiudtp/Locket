@@ -1,6 +1,6 @@
 const User = require('../model/User');
 const Picture = require('../model/Picture');
-
+require("../model/Icon")
 class PictureService {
     uploadPicture = async (file, userDecoded) => {
         if (!file) {
@@ -59,6 +59,20 @@ class PictureService {
             },
             data: pictures,
         };
+    }
+    detailPicture = async (pictureId) => {
+        const picture = await Picture.findById(pictureId)
+            .populate('uploader', 'username email')
+            .populate('reactions.icon')
+            .populate('reactions.user', 'username email');
+        if (!picture) {
+            throw new Error('Picture not found');
+        }
+        return {
+            success: true,
+            message: 'Picture retrieved successfully',
+            data: picture
+        }
     }
 }
 module.exports = new PictureService();

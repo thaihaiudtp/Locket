@@ -53,7 +53,8 @@ import com.example.locket.ui.theme.ButtonDarkGray
 @Composable
 fun CameraScreen(
     viewModel: CameraViewModel = hiltViewModel(),
-    onNavigateToHistory: () -> Unit
+    onNavigateToHistory: () -> Unit,
+    onNavigateToFriend: () -> Unit
 ) {
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
@@ -141,7 +142,7 @@ fun CameraScreen(
             ) {
                 SmallIconCircle(Icons.Rounded.Person) { /* TODO */ }
                 Button(
-                    onClick = { /* TODO */ },
+                    onClick = { onNavigateToFriend() },
                     colors = ButtonDefaults.buttonColors(containerColor = ButtonDarkGray),
                     contentPadding = PaddingValues(horizontal = 16.dp, vertical = 0.dp),
                     shape = RoundedCornerShape(50),

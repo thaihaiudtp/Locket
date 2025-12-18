@@ -21,6 +21,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.locket.ui.camera.CameraScreen
 import com.example.locket.ui.detail.DetailPictureScreen
+import com.example.locket.ui.friend.FriendScreen
 import com.example.locket.ui.history.HistoryScreen
 import com.example.locket.ui.login.LoginScreen
 import com.example.locket.ui.register.RegisterScreen
@@ -81,7 +82,8 @@ class MainActivity : ComponentActivity() {
                             CameraScreen(
                                 onNavigateToHistory = {
                                     navController.navigate("history")
-                                }
+                                },
+                                onNavigateToFriend = { navController.navigate("friend") }
                             )
                         }
                         composable(
@@ -116,6 +118,15 @@ class MainActivity : ComponentActivity() {
                                         popUpTo("camera") { inclusive = true }
                                     }
                                 }
+                            )
+                        }
+                        composable(
+                            "friend",
+                            enterTransition = { slideIntoContainer(AnimatedContentTransitionScope.SlideDirection.Up, tween(400)) },
+                            exitTransition = { slideOutOfContainer(AnimatedContentTransitionScope.SlideDirection.Down, tween(400)) }
+                        ) {
+                            FriendScreen(
+                                onNavigateBack = { navController.popBackStack() }
                             )
                         }
                     }

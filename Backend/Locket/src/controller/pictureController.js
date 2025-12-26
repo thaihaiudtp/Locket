@@ -2,9 +2,10 @@ const PictureService = require('../service/pictureService');
 class PictureController {
     uploadPicture = async(req, res) => {
         const file = req.file;
+        const { message, time, location } = req.body;
         const userDecoded = req.user;
         try {
-            const response = await PictureService.uploadPicture(file, userDecoded);
+            const response = await PictureService.uploadPicture(file, userDecoded, message, time, location);
             res.status(200).json(response);
         } catch (error) {
             res.status(400).json({success: false, message: error.message});

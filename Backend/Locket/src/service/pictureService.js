@@ -41,7 +41,7 @@ class PictureService {
         const uploaderIds = [user._id, ...friendIds];
         const [pictures, total] = await Promise.all([
             Picture.find({ uploader: { $in: uploaderIds } })
-                .select('url uploader') // chỉ lấy field cần
+                .select('url uploader message time location') // chỉ lấy field cần
                 .populate('uploader', 'username') 
                 .sort({ createdAt: -1 })
                 .skip(skip)

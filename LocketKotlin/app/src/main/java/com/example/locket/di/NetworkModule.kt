@@ -57,7 +57,7 @@ object NetworkModule {
     fun provideRetrofit(baseUrl: String, okHttpClient: OkHttpClient): Retrofit {
         return Retrofit.Builder()
             .baseUrl(baseUrl)
-            .client(okHttpClient) // <--- Quan trọng: Gán client đã cấu hình vào đây
+            .client(okHttpClient)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
     }

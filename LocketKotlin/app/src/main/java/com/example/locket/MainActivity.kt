@@ -1,3 +1,4 @@
+// locket/MainActivity.kt
 package com.example.locket
 
 import android.os.Bundle
@@ -14,13 +15,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import androidx.navigation.navArgument
 import com.example.locket.ui.camera.CameraScreen
-import com.example.locket.ui.detail.DetailPictureScreen
 import com.example.locket.ui.friend.FriendScreen
 import com.example.locket.ui.history.HistoryScreen
 import com.example.locket.ui.login.LoginScreen
@@ -40,84 +38,44 @@ class MainActivity : ComponentActivity() {
                 val isLoading by mainViewModel.isLoading.collectAsState()
                 val startDestination by mainViewModel.startDestination.collectAsState()
                 if(isLoading){
-                    Box(
-                        modifier = Modifier.fillMaxSize().background(Color.Black),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        // Có thể để trống hoặc thêm Logo Locket ở đây
-                    }
+                    Box(modifier = Modifier.fillMaxSize().background(Color.Black))
                 } else {
                     val navController = rememberNavController()
 
                     NavHost(navController = navController, startDestination = startDestination) {
-
-                        // Màn hình Login
                         composable("login") {
                             LoginScreen(
-                                onNavigateToRegister = {
-                                    // Khi bấm nút "Đăng ký ngay" -> Chuyển sang màn register
-                                    navController.navigate("register")
-                                },
+                                onNavigateToRegister = { navController.navigate("register") },
                                 onLoginSuccess = {
-                                    navController.navigate("camera") {
-                                        popUpTo("login") { inclusive = true }
-                                    }
+                                    navController.navigate("camera") { popUpTo("login") { inclusive = true } }
                                 }
                             )
                         }
-
-                        // Màn hình Register
                         composable("register") {
                             RegisterScreen(
-                                onRegisterSuccess = {
-                                    // Khi đăng ký xong -> Quay về màn login
-                                    navController.popBackStack()
-                                },
-                                onNavigateToLogin = {
-                                    navController.navigate("login")
-                                }
+                                onRegisterSuccess = { navController.popBackStack() },
+                                onNavigateToLogin = { navController.navigate("login") }
                             )
                         }
                         composable("camera") {
                             CameraScreen(
-                                onNavigateToHistory = {
-                                    navController.navigate("history")
-                                },
+                                onNavigateToHistory = { navController.navigate("history") },
                                 onNavigateToFriend = { navController.navigate("friend") }
                             )
                         }
                         composable(
                             "history",
+                            // 1. History trượt từ DƯỚI lên (SlideDirection.Up)
                             enterTransition = {
                                 slideIntoContainer(AnimatedContentTransitionScope.SlideDirection.Up, tween(400))
                             },
+                            // 2. Khi thoát, trượt xuống (SlideDirection.Down)
                             exitTransition = {
                                 slideOutOfContainer(AnimatedContentTransitionScope.SlideDirection.Down, tween(400))
                             }
                         ) {
                             HistoryScreen(
-                                onBackToCamera = { navController.popBackStack() },
-                                onPictureClick = { pictureId ->
-                                    // Điều hướng sang màn hình chi tiết tại đây
-                                    navController.navigate("detail/$pictureId")
-                                }
-                            )
-                        }
-                        composable(
-                            route = "detail/{pictureId}",
-                            arguments = listOf(navArgument("pictureId") { type = NavType.StringType })
-                        ) { backStackEntry ->
-                            val pictureId = backStackEntry.arguments?.getString("pictureId") ?: return@composable
-
-                            DetailPictureScreen(
-                                pictureId = pictureId,
-                                onNavigateBack = { navController.popBackStack() }, // Quay lại History
-                                onNavigateToCamera = {
-                                    // Quay về Camera (xóa hết backstack history và detail)
-                                    navController.navigate("camera") {
-                                        popUpTo("camera") { inclusive = true }
-                                    }
-                                }
+                                onBackToCamera = { navController.popBackStack() }
                             )
                         }
                         composable(

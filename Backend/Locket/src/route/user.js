@@ -3,7 +3,7 @@ const userController = require('../controller/userController');
 const authMiddleware = require('../middleware/auth');
 
 const router = express.Router();
-
+router.get('/profile', authMiddleware, userController.getUserProfile);
 router.get('/search', authMiddleware, userController.searchUser);
 router.post('/friend-request', authMiddleware, userController.sendFriendRequest);
 router.get('/friends', authMiddleware, userController.listMyFriends);

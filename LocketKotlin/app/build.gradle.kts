@@ -4,7 +4,6 @@ plugins {
     alias(libs.plugins.kotlin.compose)
     kotlin("kapt")
     id("com.google.dagger.hilt.android")
-    id("com.google.gms.google-services")
 }
 
 android {
@@ -76,11 +75,5 @@ dependencies {
     implementation("androidx.camera:camera-lifecycle:${camerax_version}")
     implementation("androidx.camera:camera-view:${camerax_version}")
     implementation("androidx.compose.material:material-icons-extended:1.5.4")
-    implementation(platform("com.google.firebase:firebase-bom:34.7.0"))
-    implementation("com.google.firebase:firebase-analytics")
-    implementation("com.google.firebase:firebase-auth-ktx")
-    implementation("com.google.firebase:firebase-firestore-ktx")
-    implementation("com.google.firebase:firebase-storage-ktx")
-    implementation("com.google.android.gms:play-services-auth:20.7.0")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.7.3")
 }

@@ -1,14 +1,23 @@
 package com.example.locket.data
+
+import com.example.locket.model.BaseResponse
+import com.example.locket.model.FriendListResponse
+import com.example.locket.model.FriendRequestActionRequest
+import com.example.locket.model.FriendRequestReceivedResponse
+import com.example.locket.model.FriendRequestSentResponse
 import com.example.locket.model.LoginRequest
 import com.example.locket.model.LoginResponse
 import com.example.locket.model.PictureDetailResponse
 import com.example.locket.model.PictureListResponse
 import com.example.locket.model.RegisterRequest
 import com.example.locket.model.RegisterResponse
+import com.example.locket.model.SendFriendRequestRequest
+import com.example.locket.model.SendFriendRequestResponse
 import com.example.locket.model.UserSearchResponse
 import okhttp3.MultipartBody
 import retrofit2.Response
 import retrofit2.http.*
+
 interface LocketApiService {
     @POST("auth/login")
     suspend fun login(@Body request: LoginRequest): Response<LoginResponse>
@@ -31,4 +40,22 @@ interface LocketApiService {
 
     @GET("user/search")
     suspend fun searchUsers(@Query("search") query: String): Response<UserSearchResponse>
+
+    @POST("user/friend-request")
+    suspend fun sendFriendRequest(@Body request: SendFriendRequestRequest): Response<SendFriendRequestResponse>
+
+    @GET("user/friends")
+    suspend fun getMyFriends(): Response<FriendListResponse>
+
+    @GET("user/friend-requests-recived")
+    suspend fun getReceivedFriendRequests(): Response<FriendRequestReceivedResponse>
+
+    @GET("user/friend-requests-sent")
+    suspend fun getSentFriendRequests(): Response<FriendRequestSentResponse>
+
+    @POST("user/friend-request/accept")
+    suspend fun acceptFriendRequest(@Body request: FriendRequestActionRequest): Response<BaseResponse>
+
+    @POST("user/friend-request/reject")
+    suspend fun rejectFriendRequest(@Body request: FriendRequestActionRequest): Response<BaseResponse>
 }

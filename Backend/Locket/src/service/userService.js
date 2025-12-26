@@ -132,5 +132,19 @@ class UserService {
             message: 'Friend request rejected'
         };
     }
+    getUserById = async (userId) => {
+        if (!userId) {
+            throw new Error('User ID is required');
+        }
+        const user = await User.findById(userId).select('username email friends');
+        if (!user) {
+            throw new Error('User not found');
+        }
+        return {
+            success: true,
+            message: 'User retrieved successfully',
+            data: user
+        };
+    }
 }
 module.exports = new UserService();

@@ -25,4 +25,9 @@ class TokenManager @Inject constructor(@ApplicationContext private val context: 
             preferences[TOKEN_KEY] = token
         }
     }
+    suspend fun deleteToken() {
+        context.dataStore.edit { preferences ->
+            preferences.remove(TOKEN_KEY)
+        }
+    }
 }

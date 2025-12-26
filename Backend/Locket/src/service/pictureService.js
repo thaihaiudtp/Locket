@@ -2,7 +2,7 @@ const User = require('../model/User');
 const Picture = require('../model/Picture');
 require("../model/Icon")
 class PictureService {
-    uploadPicture = async (file, userDecoded) => {
+    uploadPicture = async (file, userDecoded, message = '', time = '', location = '') => {
         if (!file) {
             throw new Error('No image file provided');
         }
@@ -11,8 +11,11 @@ class PictureService {
             throw new Error('User not found');
         }
         const newPicture = new Picture({
-            url: file.path, 
-            uploader: user._id
+            url: file.path,
+            uploader: user._id,
+            ...(message && { message }),
+            ...(time && { time }),
+            ...(location && { location })
         });
         await newPicture.save();
         user.pictures.push(newPicture._id);

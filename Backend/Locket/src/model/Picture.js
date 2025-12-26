@@ -26,8 +26,10 @@ const pictureSchema = new Schema({
                 default: Date.now
             }
         }
-    ]
-
+    ],
+    message: {type: String, default: ''},
+    time: {type: String, default: ''},
+    location: {type: String, default: ''},
 }, {
     timestamps: true
 });

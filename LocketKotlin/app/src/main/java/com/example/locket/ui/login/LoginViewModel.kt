@@ -39,7 +39,7 @@ class LoginViewModel @Inject constructor(
                         _loginState.value = LoginState.Error(body.message)
                     }
                 } else {
-                    _loginState.value = LoginState.Error("Lỗi server: ${response.code()}")
+                    _loginState.value = LoginState.Error("Lỗi server: ${response.code()} ${response.message()}")
                 }
             } catch (e: Exception) {
                 _loginState.value = LoginState.Error("Lỗi mạng: ${e.message}")

@@ -65,8 +65,6 @@ fun DetailPictureScreen(
 
         // Spacer đẩy ảnh ra giữa
         Spacer(modifier = Modifier.weight(1f))
-
-        // --- 2. MAIN CONTENT (HÌNH VUÔNG) ---
         Box(
             modifier = Modifier
                 .fillMaxWidth()

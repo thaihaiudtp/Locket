@@ -22,6 +22,7 @@ import com.example.locket.ui.camera.CameraScreen
 import com.example.locket.ui.friend.FriendScreen
 import com.example.locket.ui.history.HistoryScreen
 import com.example.locket.ui.login.LoginScreen
+import com.example.locket.ui.profile.ProfileScreen
 import com.example.locket.ui.register.RegisterScreen
 import com.example.locket.ui.theme.LocketTheme
 import dagger.hilt.android.AndroidEntryPoint
@@ -60,7 +61,8 @@ class MainActivity : ComponentActivity() {
                         composable("camera") {
                             CameraScreen(
                                 onNavigateToHistory = { navController.navigate("history") },
-                                onNavigateToFriend = { navController.navigate("friend") }
+                                onNavigateToFriend = { navController.navigate("friend") },
+                                onNavigateToProfile = { navController.navigate("profile") }
                             )
                         }
                         composable(
@@ -75,7 +77,8 @@ class MainActivity : ComponentActivity() {
                             }
                         ) {
                             HistoryScreen(
-                                onBackToCamera = { navController.popBackStack() }
+                                onBackToCamera = { navController.popBackStack() },
+                                onNavigateToProfile = { navController.navigate("profile") }
                             )
                         }
                         composable(
@@ -85,6 +88,21 @@ class MainActivity : ComponentActivity() {
                         ) {
                             FriendScreen(
                                 onNavigateBack = { navController.popBackStack() }
+                            )
+                        }
+                        composable(
+                            "profile",
+                            enterTransition = { slideIntoContainer(AnimatedContentTransitionScope.SlideDirection.Left, tween(400)) },
+                            exitTransition = { slideOutOfContainer(AnimatedContentTransitionScope.SlideDirection.Right, tween(400)) }
+                        ) {
+                            ProfileScreen(
+                                onNavigateBack = { navController.popBackStack() },
+                                onLogoutSuccess = {
+                                    // Khi logout, điều hướng về Login và xóa sạch backstack
+                                    navController.navigate("login") {
+                                        popUpTo(0) { inclusive = true }
+                                    }
+                                }
                             )
                         }
                     }

@@ -7,3 +7,8 @@ data class UserSearchResponse(
     val message: String,
     val data: List<UserDTO>
 )
+data class UserProfileResponse(
+    val success: Boolean,
+    val message: String,
+    val data: UserDTO
+)

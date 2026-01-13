@@ -17,7 +17,7 @@ import com.example.locket.model.UserSearchResponse
 import okhttp3.MultipartBody
 import retrofit2.Response
 import retrofit2.http.*
-
+import okhttp3.RequestBody
 interface LocketApiService {
     @POST("auth/login")
     suspend fun login(@Body request: LoginRequest): Response<LoginResponse>
@@ -27,7 +27,12 @@ interface LocketApiService {
 
     @Multipart
     @POST("picture/upload")
-    suspend fun uploadImage(@Part file: MultipartBody.Part): Response<Unit>
+    suspend fun uploadImage(
+        @Part file: MultipartBody.Part,
+        @Part("message") message: RequestBody? = null,
+        @Part("time") time: RequestBody? = null,
+        @Part("location") location: RequestBody? = null
+    ): Response<Unit>
 
     @GET("picture/list")
     suspend fun getPictureList(
@@ -58,4 +63,10 @@ interface LocketApiService {
 
     @POST("user/friend-request/reject")
     suspend fun rejectFriendRequest(@Body request: FriendRequestActionRequest): Response<BaseResponse>
+
+    @GET("user/profile")
+    suspend fun getProfile(): Response<com.example.locket.model.UserProfileResponse>
+
+    @DELETE("user/delete")
+    suspend fun deleteAccount(): Response<com.example.locket.model.BaseResponse>
 }

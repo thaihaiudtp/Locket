@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
-    <style name="Theme.Locket" parent="android:Theme.Material.Light.NoActionBar" />
+    <style name="Theme.Locket" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/locket_yellow</item>
+        <item name="colorPrimaryVariant">@color/locket_yellow</item>
+        <item name="colorOnPrimary">@color/black</item>
+        <item name="android:statusBarColor">@color/black</item>
+    </style>
 </resources>

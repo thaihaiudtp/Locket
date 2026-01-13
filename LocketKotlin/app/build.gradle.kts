@@ -39,7 +39,8 @@ android {
         jvmTarget = "11"
     }
     buildFeatures {
-        compose = true
+//        compose = true
+        viewBinding = true
     }
 }
 
@@ -66,9 +67,9 @@ dependencies {
     implementation("com.google.dagger:hilt-android:2.48")
     kapt("com.google.dagger:hilt-android-compiler:2.48")
     implementation("androidx.datastore:datastore-preferences:1.0.0")
-    implementation("io.coil-kt:coil-compose:2.4.0")
-    implementation("androidx.navigation:navigation-compose:2.7.5")
-    implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
+//    implementation("io.coil-kt:coil-compose:2.4.0")
+//    implementation("androidx.navigation:navigation-compose:2.7.5")
+//    implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
     val camerax_version = "1.3.0"
     implementation("androidx.camera:camera-core:${camerax_version}")
     implementation("androidx.camera:camera-camera2:${camerax_version}")
@@ -76,4 +77,11 @@ dependencies {
     implementation("androidx.camera:camera-view:${camerax_version}")
     implementation("androidx.compose.material:material-icons-extended:1.5.4")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.7.3")
+    implementation("androidx.appcompat:appcompat:1.6.1")
+    implementation("com.google.android.material:material:1.11.0")
+    implementation("androidx.constraintlayout:constraintlayout:2.1.4")
+    implementation("androidx.navigation:navigation-fragment-ktx:2.7.7")
+    implementation("androidx.navigation:navigation-ui-ktx:2.7.7")
+    implementation("androidx.recyclerview:recyclerview:1.3.2")
+    implementation("io.coil-kt:coil:2.6.0")
 }

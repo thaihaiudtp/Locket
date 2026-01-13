@@ -19,7 +19,7 @@ data class PictureData(
     val url: String,
     val uploader: Uploader,
     val message: String? = null,
-    @SerializedName("created_at")
+    @SerializedName("createdAt")
     val uploadAt: String,
     val time: String? = null,
     val location: String? = null

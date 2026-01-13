@@ -77,7 +77,7 @@ class HistoryFragment : Fragment(R.layout.fragment_history) {
         binding.btnCloseGrid.setOnClickListener {
             switchMode(isGrid = false)
         }
-
+        switchMode(isGridMode)
         // Load dữ liệu
         viewModel.loadNextPage()
     }
@@ -92,6 +92,7 @@ class HistoryFragment : Fragment(R.layout.fragment_history) {
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.pictures.collect { pictures ->
                 // Cập nhật dữ liệu cho cả 2 adapter
+                android.util.Log.d("HistoryFragment", "Data size: ${pictures.size}")
                 gridAdapter.submitList(pictures)
                 detailAdapter.submitList(pictures)
             }

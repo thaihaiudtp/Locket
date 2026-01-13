@@ -18,11 +18,9 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
-import androidx.recyclerview.widget.RecyclerView
 import coil.load
 import com.example.locket.R
 import com.example.locket.databinding.FragmentCameraBinding
-import com.example.locket.databinding.ItemFriendBinding
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import java.io.File
@@ -32,8 +30,6 @@ import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 import kotlin.math.abs
-
-data class FriendUI(val id: String, val name: String)
 
 @AndroidEntryPoint
 class CameraFragment : Fragment(R.layout.fragment_camera) {
@@ -55,15 +51,15 @@ class CameraFragment : Fragment(R.layout.fragment_camera) {
     private var showTime = false
     private var showLocation = false
 
-    private val friendsAdapter = FriendsAdapter()
+    // --- REMOVED FriendsAdapter ---
 
-    // Gesture Detector để xử lý vuốt
+    // Gesture Detector to handle swipe
     private lateinit var gestureDetector: GestureDetectorCompat
 
     private val requestPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { isGranted: Boolean ->
-        if (isGranted) startCamera() else Toast.makeText(context, "Cần quyền Camera để sử dụng", Toast.LENGTH_SHORT).show()
+        if (isGranted) startCamera() else Toast.makeText(context, "Camera permission required", Toast.LENGTH_SHORT).show()
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -84,7 +80,7 @@ class CameraFragment : Fragment(R.layout.fragment_camera) {
                 val distanceY = e2.y - e1.y
                 val distanceX = e2.x - e1.x
 
-                // Logic: Vuốt từ dưới lên (Y giảm, distanceY âm) và vuốt dọc nhiều hơn vuốt ngang
+                // Logic: Swipe up (Y decreases, distanceY negative)
                 if (abs(distanceY) > abs(distanceX) && distanceY < -50) {
                     openHistory()
                     return true
@@ -98,7 +94,7 @@ class CameraFragment : Fragment(R.layout.fragment_camera) {
         try {
             findNavController().navigate(R.id.action_cameraFragment_to_historyFragment)
         } catch (e: Exception) {
-            Log.e("CameraFragment", "Lỗi điều hướng History: ${e.message}")
+            Log.e("CameraFragment", "Nav Error: ${e.message}")
         }
     }
 
@@ -112,32 +108,27 @@ class CameraFragment : Fragment(R.layout.fragment_camera) {
 
     @SuppressLint("ClickableViewAccessibility")
     private fun setupUI() {
-        // --- 1. XỬ LÝ CLICK NÚT ---
-        // Nút Chụp
+        // --- BUTTON LISTENERS ---
         binding.btnCapture.setOnClickListener { takePhoto() }
 
-        // Nút Add Friend
         binding.btnAddFriend.setOnClickListener {
             try {
                 findNavController().navigate(R.id.action_cameraFragment_to_friendFragment)
             } catch (e: Exception) {
-                Toast.makeText(context, "Lỗi mở Friend: ${e.message}", Toast.LENGTH_SHORT).show()
+                // Ignore if nav action missing
             }
         }
 
-        // Nút Profile
         binding.btnProfile.setOnClickListener {
             try {
                 findNavController().navigate(R.id.action_cameraFragment_to_profileFragment)
             } catch (e: Exception) {
-                Toast.makeText(context, "Lỗi mở Profile: ${e.message}", Toast.LENGTH_SHORT).show()
+                // Ignore
             }
         }
 
-        // Nút History (Click icon)
         binding.btnHistory.setOnClickListener { openHistory() }
 
-        // Các nút chức năng khác
         binding.btnFlipCamera.setOnClickListener {
             lensFacing = if (lensFacing == CameraSelector.LENS_FACING_BACK) CameraSelector.LENS_FACING_FRONT else CameraSelector.LENS_FACING_BACK
             startCamera()
@@ -146,27 +137,15 @@ class CameraFragment : Fragment(R.layout.fragment_camera) {
         binding.btnFlash.setOnClickListener {
             isFlashOn = !isFlashOn
             imageCapture?.flashMode = if(isFlashOn) ImageCapture.FLASH_MODE_ON else ImageCapture.FLASH_MODE_OFF
-            binding.btnFlash.imageAlpha = if(isFlashOn) 255 else 128 // Hiệu ứng mờ khi tắt
+            binding.btnFlash.imageAlpha = if(isFlashOn) 255 else 128
         }
 
-        // --- 2. XỬ LÝ CẢM ỨNG & VUỐT ---
-
-        // A. Gắn sự kiện vuốt cho TOÀN BỘ màn hình (bao gồm vùng đen)
-        binding.root.setOnTouchListener { _, event ->
-            gestureDetector.onTouchEvent(event)
-            // Trả về false để sự kiện có thể đi tiếp xuống các view con (như nút bấm)
-            // Tuy nhiên, nếu view con không xử lý click, root sẽ tiêu thụ event.
-            // Để an toàn cho các nút bấm, ta nên cẩn thận.
-            // Cách tốt nhất: gestureDetector.onTouchEvent trả về true nếu xử lý vuốt, false nếu không.
-            return@setOnTouchListener gestureDetector.onTouchEvent(event)
-        }
-
-        // B. Gắn sự kiện Lấy Nét (Focus) chỉ cho vùng ViewFinder
+        // --- TOUCH LISTENER ---
         binding.viewFinder.setOnTouchListener { _, event ->
-            // Ưu tiên kiểm tra vuốt trước (để vuốt trên camera vẫn mở History)
-            if (gestureDetector.onTouchEvent(event)) return@setOnTouchListener true
+            if (gestureDetector.onTouchEvent(event)) {
+                return@setOnTouchListener true
+            }
 
-            // Nếu không phải vuốt mà là chạm nhả (Tap) -> Lấy nét
             if (event.action == MotionEvent.ACTION_UP) {
                 val factory = binding.viewFinder.meteringPointFactory
                 val point = factory.createPoint(event.x, event.y)
@@ -179,25 +158,32 @@ class CameraFragment : Fragment(R.layout.fragment_camera) {
             return@setOnTouchListener true
         }
 
-        // --- UI REVIEW MODE ---
+        // --- REVIEW MODE UI ---
         binding.btnCloseReview.setOnClickListener { resetToCameraMode() }
+
         binding.btnToggleTime.setOnClickListener {
             showTime = !showTime
             binding.tvTimeOverlay.isVisible = showTime
         }
+
         binding.btnToggleLocation.setOnClickListener {
             showLocation = !showLocation
             binding.tvLocationOverlay.isVisible = showLocation
         }
+
         binding.btnSend.setOnClickListener {
             capturedFile?.let { file ->
                 val msg = binding.etMessage.text.toString()
-                viewModel.uploadImage(file, if(msg.isNotBlank()) msg else null, if (showTime) currentTimeStr else null, if (showLocation) currentLocation else null)
+                viewModel.uploadImage(
+                    file,
+                    if(msg.isNotBlank()) msg else null,
+                    if (showTime) currentTimeStr else null,
+                    if (showLocation) currentLocation else null
+                )
             }
         }
 
-        binding.rvFriends.adapter = friendsAdapter
-        friendsAdapter.submitList(listOf(FriendUI("all", "All"), FriendUI("1", "Alice"), FriendUI("2", "Bob")))
+        // --- REMOVED rvFriends ADAPTER SETUP ---
     }
 
     private fun startCamera() {
@@ -266,26 +252,4 @@ class CameraFragment : Fragment(R.layout.fragment_camera) {
         cameraExecutor?.shutdown()
         _binding = null
     }
-}
-
-class FriendsAdapter : RecyclerView.Adapter<FriendsAdapter.ViewHolder>() {
-    private var items = listOf<FriendUI>()
-    private var selectedPosition = 0
-    fun submitList(list: List<FriendUI>) { items = list; notifyDataSetChanged() }
-    inner class ViewHolder(val binding: ItemFriendBinding) : RecyclerView.ViewHolder(binding.root)
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        val binding = ItemFriendBinding.inflate(LayoutInflater.from(parent.context), parent, false)
-        return ViewHolder(binding)
-    }
-    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val item = items[position]
-        holder.binding.tvName.text = item.name
-        holder.binding.tvAvatar.text = item.name.first().toString()
-        val isSelected = position == selectedPosition
-        holder.binding.cardAvatar.setCardBackgroundColor(if(isSelected) android.graphics.Color.parseColor("#FFD700") else android.graphics.Color.parseColor("#2C2C2C"))
-        holder.itemView.setOnClickListener {
-            val prev = selectedPosition; selectedPosition = holder.adapterPosition; notifyItemChanged(prev); notifyItemChanged(selectedPosition)
-        }
-    }
-    override fun getItemCount() = items.size
 }

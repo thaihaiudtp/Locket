@@ -196,14 +196,15 @@
             android:layout_height="40dp"
             android:layout_marginEnd="24dp"
             android:background="?selectableItemBackgroundBorderless"
-            android:src="@drawable/ic_history"
+            android:src="@drawable/ic_schedule"
             app:tint="@color/gray" />
+
         <ImageButton
             android:id="@+id/btnToggleLocation"
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:background="?selectableItemBackgroundBorderless"
-            android:src="@drawable/ic_search"
+            android:src="@drawable/ic_location_on"
             app:tint="@color/gray" />
     </LinearLayout>
 
@@ -228,10 +229,10 @@
         android:src="@drawable/ic_arrow_back"
         android:rotation="90"
         android:padding="20dp"
-        app:layout_constraintBottom_toTopOf="@id/rvFriends"
+        android:layout_marginBottom="32dp"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/etMessage"
         app:tint="@color/black" />
     <ProgressBar
         android:id="@+id/progressSend"
@@ -245,32 +246,11 @@
         app:layout_constraintStart_toStartOf="@id/btnSend"
         app:layout_constraintTop_toTopOf="@id/btnSend"/>
 
-    <TextView
-        android:id="@+id/tvSendTo"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp"
-        android:layout_marginStart="16dp"
-        android:text="Send to..."
-        android:textColor="@color/gray"
-        android:textSize="12sp"
-        app:layout_constraintBottom_toTopOf="@id/rvFriends"
-        app:layout_constraintStart_toStartOf="parent"/>
-
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rvFriends"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
-        android:orientation="horizontal"
-        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-        app:layout_constraintBottom_toBottomOf="parent" />
-
     <androidx.constraintlayout.widget.Group
         android:id="@+id/groupReviewUI"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:visibility="gone"
-        app:constraint_referenced_ids="btnCloseReview,layoutToggles,etMessage,btnSend,rvFriends,tvSendTo" />
+        app:constraint_referenced_ids="btnCloseReview,layoutToggles,etMessage,btnSend" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

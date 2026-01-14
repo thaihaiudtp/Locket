@@ -24,16 +24,11 @@ object NetworkModule {
     @Provides
     @Singleton
     fun provideOkHttpClient(tokenManager: TokenManager): OkHttpClient {
-        // Interceptor để tự động thêm Token
         val authInterceptor = okhttp3.Interceptor { chain ->
             val requestBuilder = chain.request().newBuilder()
-
-            // Lấy token từ DataStore (dùng runBlocking vì Interceptor chạy đồng bộ)
             val token = runBlocking {
                 tokenManager.tokenFlow.firstOrNull()
             }
-
-            // Nếu có token thì thêm vào Header
             if (!token.isNullOrBlank()) {
                 requestBuilder.addHeader("Authorization", "Bearer $token")
             }

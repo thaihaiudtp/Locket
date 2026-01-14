@@ -7,7 +7,6 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import coil.load
-import coil.transform.RoundedCornersTransformation
 import com.example.locket.databinding.ItemMessageBinding
 import com.example.locket.model.MessageDTO
 
@@ -38,7 +37,7 @@ class MessageAdapter(
                 binding.layoutMe.isVisible = true
                 binding.layoutOther.isVisible = false
 
-                // 1. Hiển thị Text (nếu có)
+                // 1. Xử lý Text
                 if (item.content.isNotBlank()) {
                     binding.tvMsgMe.isVisible = true
                     binding.tvMsgMe.text = item.content
@@ -46,15 +45,16 @@ class MessageAdapter(
                     binding.tvMsgMe.isVisible = false
                 }
 
-                // 2. Hiển thị Ảnh (nếu có)
+                // 2. Xử lý Ảnh (Ẩn/Hiện CardView chứa ảnh)
                 if (!imageUrl.isNullOrEmpty()) {
+                    binding.cardImgMe.isVisible = true
                     binding.imgAttachMe.isVisible = true
                     binding.imgAttachMe.load(imageUrl) {
                         crossfade(true)
-                        transformations(RoundedCornersTransformation(16f)) // Bo góc ảnh cho đẹp
+                        // Không cần transformation nữa vì CardView đã bo góc
                     }
                 } else {
-                    binding.imgAttachMe.isVisible = false
+                    binding.cardImgMe.isVisible = false
                 }
 
             } else {
@@ -62,7 +62,7 @@ class MessageAdapter(
                 binding.layoutMe.isVisible = false
                 binding.layoutOther.isVisible = true
 
-                // 1. Hiển thị Text
+                // 1. Xử lý Text
                 if (item.content.isNotBlank()) {
                     binding.tvMsgOther.isVisible = true
                     binding.tvMsgOther.text = item.content
@@ -70,15 +70,15 @@ class MessageAdapter(
                     binding.tvMsgOther.isVisible = false
                 }
 
-                // 2. Hiển thị Ảnh
+                // 2. Xử lý Ảnh (Ẩn/Hiện CardView chứa ảnh)
                 if (!imageUrl.isNullOrEmpty()) {
+                    binding.cardImgOther.isVisible = true
                     binding.imgAttachOther.isVisible = true
                     binding.imgAttachOther.load(imageUrl) {
                         crossfade(true)
-                        transformations(RoundedCornersTransformation(16f))
                     }
                 } else {
-                    binding.imgAttachOther.isVisible = false
+                    binding.cardImgOther.isVisible = false
                 }
             }
         }

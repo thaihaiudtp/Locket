@@ -5,7 +5,7 @@ import com.google.gson.annotations.SerializedName
 
 data class ConversationDTO(
     @SerializedName("_id") val id: String,
-    val participants: List<String>, // Danh sách ID người tham gia
+    val participants: List<ParticipantDTO>,
     val pairKey: String,
     val lastMessageAt: String
 )
@@ -56,4 +56,9 @@ data class SendMessageRequest(
 data class SendMessageResponse(
     val success: Boolean,
     val message: String
+)
+
+data class ParticipantDTO(
+    @SerializedName("_id") val id: String,
+    val username: String
 )

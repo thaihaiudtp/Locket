@@ -9,9 +9,12 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.locket.R
+import com.example.locket.data.TokenManager
 import com.example.locket.databinding.FragmentConversationBinding
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class ConversationFragment : Fragment(R.layout.fragment_conversation) {
@@ -20,48 +23,48 @@ class ConversationFragment : Fragment(R.layout.fragment_conversation) {
     private var _binding: FragmentConversationBinding? = null
     private val binding get() = _binding!!
 
-    // TODO: Bạn cần thay thế giá trị này bằng ID thật của user đang đăng nhập
-    // (Lấy từ SharedPreferences, DataStore hoặc UserSession nơi bạn lưu token)
-    private val currentUserId = "ID_CUA_MINH_LOG_TU_TOKEN"
+    @Inject
+    lateinit var tokenManager: TokenManager
+
+    private var currentUserId: String = ""
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         _binding = FragmentConversationBinding.bind(view)
 
-        setupUI()
+        // [MỚI] Xử lý sự kiện nút Back ngay khi View được tạo
+        binding.btnBack.setOnClickListener {
+            findNavController().popBackStack()
+        }
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            val userId = tokenManager.userIdFlow.first()
+            if (!userId.isNullOrEmpty()) {
+                currentUserId = userId
+                setupUI()
+            } else {
+                Toast.makeText(context, "Lỗi xác thực, vui lòng đăng nhập lại", Toast.LENGTH_SHORT).show()
+                findNavController().popBackStack()
+            }
+        }
     }
 
     private fun setupUI() {
-        // Khởi tạo Adapter: Truyền currentUserId vào để Adapter biết đâu là mình, đâu là bạn
-        val adapter = ConversationAdapter(currentUserId) { conversation ->
-            // === LOGIC LẤY ID ĐỐI PHƯƠNG ===
-            // participants là danh sách [ID_CUA_MINH, ID_DOI_PHUONG]
-            // Ta tìm cái ID nào KHÁC currentUserId thì đó là người kia
-            val receiverId = conversation.participants.firstOrNull { it != currentUserId }
-
-            if (receiverId != null) {
-                val bundle = Bundle().apply {
-                    putString("conversationId", conversation.id)
-                    putString("receiverId", receiverId)
-                }
-                // Điều hướng sang màn hình chat chi tiết
-                // Đảm bảo bạn đã tạo action này trong nav_graph.xml
-                findNavController().navigate(R.id.action_conversation_to_detail, bundle)
-            } else {
-                Toast.makeText(context, "Không xác định được người nhận", Toast.LENGTH_SHORT).show()
+        val adapter = ConversationAdapter(currentUserId) { conversation, receiverId, receiverName ->
+            val bundle = Bundle().apply {
+                putString("conversationId", conversation.id)
+                putString("receiverId", receiverId)
             }
+            findNavController().navigate(R.id.action_conversation_to_detail, bundle)
         }
 
         binding.rvConversations.adapter = adapter
         binding.rvConversations.layoutManager = LinearLayoutManager(context)
 
-        // Gọi API tải danh sách hội thoại
         viewModel.loadConversations()
 
-        // Observer: Lắng nghe dữ liệu trả về từ ViewModel
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.conversations.collect { list ->
-                // Kiểm tra nếu list rỗng thì có thể hiện text "Chưa có tin nhắn" (tuỳ chọn)
                 adapter.submitList(list)
             }
         }

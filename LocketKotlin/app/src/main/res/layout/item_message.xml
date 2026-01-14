@@ -8,60 +8,77 @@
 
     <LinearLayout
         android:id="@+id/layoutMe"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:gravity="end"
+        app:layout_constraintWidth_percent="0.8"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
-        <ImageView
-            android:id="@+id/imgAttachMe"
-            android:layout_width="200dp"
-            android:layout_height="200dp"
-            android:scaleType="centerCrop"
+        <androidx.cardview.widget.CardView
+            android:id="@+id/cardImgMe"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="0dp"
+            app:cardBackgroundColor="@android:color/transparent"
             android:layout_marginBottom="4dp"
-            android:visibility="gone"/>
+            android:visibility="gone">
+            <ImageView
+                android:id="@+id/imgAttachMe"
+                android:layout_width="200dp"
+                android:layout_height="200dp"
+                android:scaleType="centerCrop"/>
+        </androidx.cardview.widget.CardView>
 
         <TextView
             android:id="@+id/tvMsgMe"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="@drawable/bg_capture_button"
-            android:backgroundTint="@color/locket_yellow"
+            android:background="@drawable/bg_message_me"
             android:padding="12dp"
             android:text="My message"
             android:textColor="@color/black"
-            android:maxWidth="250dp"
+            android:textSize="16sp"
             android:visibility="gone"/>
     </LinearLayout>
 
     <LinearLayout
         android:id="@+id/layoutOther"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:gravity="start"
+        app:layout_constraintWidth_percent="0.8"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
-        <ImageView
-            android:id="@+id/imgAttachOther"
-            android:layout_width="200dp"
-            android:layout_height="200dp"
-            android:scaleType="centerCrop"
+        <androidx.cardview.widget.CardView
+            android:id="@+id/cardImgOther"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="0dp"
+            app:cardBackgroundColor="@android:color/transparent"
             android:layout_marginBottom="4dp"
-            android:visibility="gone"/>
+            android:visibility="gone">
+            <ImageView
+                android:id="@+id/imgAttachOther"
+                android:layout_width="200dp"
+                android:layout_height="200dp"
+                android:scaleType="centerCrop"/>
+        </androidx.cardview.widget.CardView>
 
         <TextView
             android:id="@+id/tvMsgOther"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="@drawable/bg_reaction_bar"
+            android:background="@drawable/bg_message_other"
             android:padding="12dp"
             android:text="Other message"
             android:textColor="@color/white"
-            android:maxWidth="250dp"
+            android:textSize="16sp"
             android:visibility="gone"/>
     </LinearLayout>
 

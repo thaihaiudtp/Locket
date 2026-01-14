@@ -11,8 +11,8 @@ import java.text.SimpleDateFormat
 import java.util.Locale
 
 class ConversationAdapter(
-    private val currentUserId: String, // ID của người dùng hiện tại (để biết ai là người đối diện)
-    private val onItemClick: (ConversationDTO) -> Unit
+    private val currentUserId: String, // ID của mình
+    private val onItemClick: (ConversationDTO, String, String) -> Unit // Trả về (Conversation, ReceiverId, ReceiverName)
 ) : ListAdapter<ConversationDTO, ConversationAdapter.ConversationViewHolder>(ConversationDiffCallback()) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ConversationViewHolder {
@@ -28,26 +28,33 @@ class ConversationAdapter(
         RecyclerView.ViewHolder(binding.root) {
 
         fun bind(item: ConversationDTO) {
-            // Logic: Tìm ID người kia trong danh sách participants
-            val otherUserId = item.participants.firstOrNull { it != currentUserId } ?: "Unknown"
+            // LOGIC MỚI: Tìm người kia trong danh sách object participants
+            // Lấy người có id KHÁC currentUserId
+            val otherParticipant = item.participants.firstOrNull { it.id != currentUserId }
 
-            // TODO: Ở đây bạn nên dùng ID này để lấy tên User từ Cache hoặc gọi API phụ
-            // Tạm thời hiển thị ID rút gọn
-            binding.tvUsername.text = "User: ${otherUserId.take(5)}..."
-            binding.tvAvatar.text = otherUserId.take(1).uppercase()
+            // Nếu chat với chính mình (participants gồm 2 người giống nhau) thì lấy người đầu tiên
+            val targetUser = otherParticipant ?: item.participants.firstOrNull()
 
-            // Hiển thị thời gian tin nhắn cuối
+            if (targetUser != null) {
+                binding.tvUsername.text = targetUser.username
+                binding.tvAvatar.text = targetUser.username.take(1).uppercase()
+            } else {
+                binding.tvUsername.text = "Unknown"
+                binding.tvAvatar.text = "?"
+            }
+
             binding.tvLastMsg.text = formatTime(item.lastMessageAt)
 
             binding.root.setOnClickListener {
-                onItemClick(item)
+                if (targetUser != null) {
+                    onItemClick(item, targetUser.id, targetUser.username)
+                }
             }
         }
 
         private fun formatTime(timeStr: String?): String {
             if (timeStr.isNullOrEmpty()) return ""
             return try {
-                // Giả sử server trả về ISO 8601
                 val inputFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US)
                 val outputFormat = SimpleDateFormat("HH:mm dd/MM", Locale.getDefault())
                 val date = inputFormat.parse(timeStr)
@@ -60,11 +67,6 @@ class ConversationAdapter(
 }
 
 class ConversationDiffCallback : DiffUtil.ItemCallback<ConversationDTO>() {
-    override fun areItemsTheSame(oldItem: ConversationDTO, newItem: ConversationDTO): Boolean {
-        return oldItem.id == newItem.id
-    }
-
-    override fun areContentsTheSame(oldItem: ConversationDTO, newItem: ConversationDTO): Boolean {
-        return oldItem == newItem
-    }
+    override fun areItemsTheSame(oldItem: ConversationDTO, newItem: ConversationDTO) = oldItem.id == newItem.id
+    override fun areContentsTheSame(oldItem: ConversationDTO, newItem: ConversationDTO) = oldItem == newItem
 }

@@ -13,7 +13,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.PagerSnapHelper
 import com.example.locket.R
-import com.example.locket.data.TokenManager // Import TokenManager
+import com.example.locket.data.TokenManager
 import com.example.locket.databinding.FragmentHistoryBinding
 import com.example.locket.util.TimeUtils
 import dagger.hilt.android.AndroidEntryPoint
@@ -28,7 +28,6 @@ class HistoryFragment : Fragment(R.layout.fragment_history) {
     private var _binding: FragmentHistoryBinding? = null
     private val binding get() = _binding!!
 
-    // [MỚI] Inject TokenManager để lấy ID từ token đã lưu
     @Inject
     lateinit var tokenManager: TokenManager
 
@@ -36,15 +35,12 @@ class HistoryFragment : Fragment(R.layout.fragment_history) {
     private lateinit var detailAdapter: HistoryDetailAdapter
 
     private var isGridMode = false
-
-    // Biến này sẽ được cập nhật từ TokenManager
     private var currentUserId: String = ""
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         _binding = FragmentHistoryBinding.bind(view)
 
-        // [QUAN TRỌNG] Lấy UserID trước khi setup UI
         viewLifecycleOwner.lifecycleScope.launch {
             val userId = tokenManager.userIdFlow.first()
 
@@ -52,14 +48,19 @@ class HistoryFragment : Fragment(R.layout.fragment_history) {
                 currentUserId = userId
                 Log.d("HistoryFragment", "Logged in as: $currentUserId")
 
-                // Chỉ setup khi đã có ID để logic Reply (ẩn/hiện nút gửi) hoạt động đúng
                 setupAdapters()
                 setupUI()
                 observeViewModel()
+
+                // [SỬA LỖI DUPLICATE TẠI ĐÂY]
+                // Chỉ gọi loadNextPage nếu danh sách hiện tại đang RỖNG.
+                // Nếu ViewModel đã có data (do quay lại từ màn hình khác), ta không cần load lại.
+                if (viewModel.pictures.value.isEmpty()) {
+                    viewModel.loadNextPage()
+                }
             } else {
-                // Nếu không có token -> Về màn hình Login
                 Toast.makeText(context, "Phiên đăng nhập hết hạn", Toast.LENGTH_SHORT).show()
-                findNavController().navigate(R.id.action_historyFragment_to_loginFragment) // Đảm bảo action này tồn tại trong nav_graph
+                findNavController().navigate(R.id.action_historyFragment_to_loginFragment)
             }
         }
 
@@ -67,15 +68,14 @@ class HistoryFragment : Fragment(R.layout.fragment_history) {
     }
 
     private fun setupAdapters() {
-        // Grid Adapter
+        // ... (Giữ nguyên code cũ)
         gridAdapter = HistoryGridAdapter { position ->
             switchMode(isGrid = false)
             binding.rvDetail.scrollToPosition(position)
         }
 
-        // Detail Adapter
         detailAdapter = HistoryDetailAdapter(
-            currentUserId = currentUserId, // ID này giờ là ID thật
+            currentUserId = currentUserId,
             onSwitchToGrid = { switchMode(isGrid = true) },
             onBackToCamera = { findNavController().popBackStack() },
             onNavigateToProfile = {
@@ -88,9 +88,7 @@ class HistoryFragment : Fragment(R.layout.fragment_history) {
                     e.printStackTrace()
                 }
             },
-            calculateTimeAgo = { timeStr ->
-                TimeUtils.getTimeAgo(timeStr)
-            },
+            calculateTimeAgo = { timeStr -> TimeUtils.getTimeAgo(timeStr) },
             onSendMessage = { receiverId, content, pictureId ->
                 viewModel.sendMessage(receiverId, content, pictureId) {
                     Toast.makeText(context, "Reply sent!", Toast.LENGTH_SHORT).show()
@@ -112,11 +110,13 @@ class HistoryFragment : Fragment(R.layout.fragment_history) {
             switchMode(isGrid = false)
         }
 
-        // Mặc định vào là Grid hay Detail tuỳ bạn chỉnh biến isGridMode ban đầu
         switchMode(isGridMode)
-        viewModel.loadNextPage()
+
+        // [QUAN TRỌNG] Xóa dòng viewModel.loadNextPage() ở đây đi
+        // Vì ta đã di chuyển logic check lên onViewCreated rồi.
     }
 
+    // ... (Các phần switchMode, observeViewModel, handleBackPress giữ nguyên)
     private fun switchMode(isGrid: Boolean) {
         isGridMode = isGrid
         binding.layoutGridMode.isVisible = isGrid
@@ -130,7 +130,7 @@ class HistoryFragment : Fragment(R.layout.fragment_history) {
                 detailAdapter.submitList(pictures)
             }
         }
-
+        // ...
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.isLoading.collect { isLoading ->
                 binding.progressBar.isVisible = isLoading && gridAdapter.itemCount == 0

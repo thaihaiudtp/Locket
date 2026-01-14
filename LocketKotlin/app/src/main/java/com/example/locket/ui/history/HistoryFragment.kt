@@ -1,20 +1,25 @@
 package com.example.locket.ui.history
 
 import android.os.Bundle
+import android.util.Log
 import android.view.View
+import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
-import androidx.recyclerview.widget.GridLayoutManager // Import này
+import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.PagerSnapHelper
 import com.example.locket.R
+import com.example.locket.data.TokenManager // Import TokenManager
 import com.example.locket.databinding.FragmentHistoryBinding
-import com.example.locket.util.TimeUtils // Import TimeUtils
+import com.example.locket.util.TimeUtils
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class HistoryFragment : Fragment(R.layout.fragment_history) {
@@ -23,62 +28,92 @@ class HistoryFragment : Fragment(R.layout.fragment_history) {
     private var _binding: FragmentHistoryBinding? = null
     private val binding get() = _binding!!
 
+    // [MỚI] Inject TokenManager để lấy ID từ token đã lưu
+    @Inject
+    lateinit var tokenManager: TokenManager
+
     private lateinit var gridAdapter: HistoryGridAdapter
     private lateinit var detailAdapter: HistoryDetailAdapter
 
     private var isGridMode = false
 
+    // Biến này sẽ được cập nhật từ TokenManager
+    private var currentUserId: String = ""
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         _binding = FragmentHistoryBinding.bind(view)
 
-        setupAdapters()
-        setupUI()
-        observeViewModel()
+        // [QUAN TRỌNG] Lấy UserID trước khi setup UI
+        viewLifecycleOwner.lifecycleScope.launch {
+            val userId = tokenManager.userIdFlow.first()
+
+            if (!userId.isNullOrEmpty()) {
+                currentUserId = userId
+                Log.d("HistoryFragment", "Logged in as: $currentUserId")
+
+                // Chỉ setup khi đã có ID để logic Reply (ẩn/hiện nút gửi) hoạt động đúng
+                setupAdapters()
+                setupUI()
+                observeViewModel()
+            } else {
+                // Nếu không có token -> Về màn hình Login
+                Toast.makeText(context, "Phiên đăng nhập hết hạn", Toast.LENGTH_SHORT).show()
+                findNavController().navigate(R.id.action_historyFragment_to_loginFragment) // Đảm bảo action này tồn tại trong nav_graph
+            }
+        }
+
         handleBackPress()
     }
 
     private fun setupAdapters() {
-        // 1. Grid Adapter
+        // Grid Adapter
         gridAdapter = HistoryGridAdapter { position ->
-            // Khi click vào ảnh nhỏ: chuyển sang chế độ Detail và cuộn tới ảnh đó
             switchMode(isGrid = false)
-            // Cần layoutManager để scrollToPosition hoạt động chính xác
             binding.rvDetail.scrollToPosition(position)
         }
 
-        // 2. Detail Adapter
+        // Detail Adapter
         detailAdapter = HistoryDetailAdapter(
+            currentUserId = currentUserId, // ID này giờ là ID thật
             onSwitchToGrid = { switchMode(isGrid = true) },
             onBackToCamera = { findNavController().popBackStack() },
             onNavigateToProfile = {
                 findNavController().navigate(R.id.action_historyFragment_to_profileFragment)
             },
+            onNavigateToChat = {
+                try {
+                    findNavController().navigate(R.id.action_historyFragment_to_conversationFragment)
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+            },
             calculateTimeAgo = { timeStr ->
-                // Sử dụng TimeUtils để tính toán
                 TimeUtils.getTimeAgo(timeStr)
+            },
+            onSendMessage = { receiverId, content, pictureId ->
+                viewModel.sendMessage(receiverId, content, pictureId) {
+                    Toast.makeText(context, "Reply sent!", Toast.LENGTH_SHORT).show()
+                }
             }
         )
     }
 
     private fun setupUI() {
-        // --- SỬA LỖI GRID VIEW ---
-        // Thiết lập LayoutManager bằng code để chắc chắn nó hoạt động
         val gridLayoutManager = GridLayoutManager(context, 3)
         binding.rvGrid.layoutManager = gridLayoutManager
         binding.rvGrid.adapter = gridAdapter
 
-        // --- SETUP DETAIL VIEW ---
         binding.rvDetail.adapter = detailAdapter
         val snapHelper = PagerSnapHelper()
         snapHelper.attachToRecyclerView(binding.rvDetail)
 
-        // Nút đóng Grid (dấu X hoặc mũi tên)
         binding.btnCloseGrid.setOnClickListener {
             switchMode(isGrid = false)
         }
+
+        // Mặc định vào là Grid hay Detail tuỳ bạn chỉnh biến isGridMode ban đầu
         switchMode(isGridMode)
-        // Load dữ liệu
         viewModel.loadNextPage()
     }
 
@@ -91,8 +126,6 @@ class HistoryFragment : Fragment(R.layout.fragment_history) {
     private fun observeViewModel() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.pictures.collect { pictures ->
-                // Cập nhật dữ liệu cho cả 2 adapter
-                android.util.Log.d("HistoryFragment", "Data size: ${pictures.size}")
                 gridAdapter.submitList(pictures)
                 detailAdapter.submitList(pictures)
             }
@@ -100,7 +133,6 @@ class HistoryFragment : Fragment(R.layout.fragment_history) {
 
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.isLoading.collect { isLoading ->
-                // Chỉ hiện loading nếu danh sách đang rỗng
                 binding.progressBar.isVisible = isLoading && gridAdapter.itemCount == 0
             }
         }
@@ -110,10 +142,8 @@ class HistoryFragment : Fragment(R.layout.fragment_history) {
         requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
                 if (isGridMode) {
-                    // Nếu đang ở Grid -> Back về Detail
                     switchMode(isGrid = false)
                 } else {
-                    // Nếu đang ở Detail -> Back về Camera
                     findNavController().popBackStack()
                 }
             }

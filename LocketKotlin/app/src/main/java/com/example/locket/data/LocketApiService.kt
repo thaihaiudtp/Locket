@@ -1,18 +1,22 @@
 package com.example.locket.data
 
 import com.example.locket.model.BaseResponse
+import com.example.locket.model.ConversationResponse
 import com.example.locket.model.FriendListResponse
 import com.example.locket.model.FriendRequestActionRequest
 import com.example.locket.model.FriendRequestReceivedResponse
 import com.example.locket.model.FriendRequestSentResponse
 import com.example.locket.model.LoginRequest
 import com.example.locket.model.LoginResponse
+import com.example.locket.model.MessageDetailResponse
 import com.example.locket.model.PictureDetailResponse
 import com.example.locket.model.PictureListResponse
 import com.example.locket.model.RegisterRequest
 import com.example.locket.model.RegisterResponse
 import com.example.locket.model.SendFriendRequestRequest
 import com.example.locket.model.SendFriendRequestResponse
+import com.example.locket.model.SendMessageRequest
+import com.example.locket.model.SendMessageResponse
 import com.example.locket.model.UserSearchResponse
 import okhttp3.MultipartBody
 import retrofit2.Response
@@ -69,4 +73,23 @@ interface LocketApiService {
 
     @DELETE("user/delete")
     suspend fun deleteAccount(): Response<com.example.locket.model.BaseResponse>
+
+    @GET("message/get-conversations")
+    suspend fun getConversations(
+        @Query("page") page: Int = 1,
+        @Query("limit") limit: Int = 20
+    ): Response<ConversationResponse>
+
+    @GET("message/conversation/{id}")
+    suspend fun getMessagesInConversation(
+        @Path("id") conversationId: String,
+        @Query("page") page: Int = 1,
+        @Query("limit") limit: Int = 20
+    ): Response<MessageDetailResponse>
+
+    // 3. Gửi tin nhắn
+    @POST("message/send-message")
+    suspend fun sendMessage(
+        @Body request: SendMessageRequest
+    ): Response<SendMessageResponse>
 }

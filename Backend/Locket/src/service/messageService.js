@@ -11,6 +11,7 @@ class MessageService {
         .skip(skip)
         .limit(limit)
         .select('_id participants pairKey lastMessageAt')
+        .populate('participants', 'username')
         .lean();
         return {
             success: true,
@@ -44,14 +45,22 @@ class MessageService {
     }
     getMessagesInConversation = async (conversationId, page = 1, limit = 20) => {
         const skip = (page - 1) * limit;
-        const messageThread = await Message.findById(conversationId);
+        const messageThread = await Message.findById(conversationId)
+            .populate('messages.attachedPicture', 'url');
         if (!messageThread) {
             throw new Error('Conversation not found');
         }
+
         const totalMessages = messageThread.messages.length;
         const messages = messageThread.messages
-            .sort((a, b) => b.createdAt - a.createdAt) 
-            .slice(skip, skip + limit);
+            .map(m => (m.toObject ? m.toObject() : m))
+            .sort((a, b) => b.createdAt - a.createdAt)
+            .slice(skip, skip + limit)
+            .map(m => ({
+                ...m,
+                attachmentUrl: m.attachedPicture?.url || null,
+            }));
+
         return {
             success: true,
             message: 'Messages retrieved successfully',

@@ -182,7 +182,14 @@ class CameraFragment : Fragment(R.layout.fragment_camera) {
                 )
             }
         }
-
+        binding.btnChat.setOnClickListener {
+            try {
+                findNavController().navigate(R.id.action_cameraFragment_to_conversationFragment)
+            } catch (e: Exception) {
+                // Log lỗi nếu chưa tìm thấy action
+                e.printStackTrace()
+            }
+        }
         // --- REMOVED rvFriends ADAPTER SETUP ---
     }
 

@@ -55,6 +55,14 @@
             app:exitAnim="@android:anim/fade_out"
             app:popEnterAnim="@android:anim/fade_in"
             app:popExitAnim="@android:anim/fade_out"/>
+
+        <action
+            android:id="@+id/action_cameraFragment_to_conversationFragment"
+            app:destination="@id/conversationFragment"
+            app:enterAnim="@android:anim/slide_in_left"
+            app:exitAnim="@android:anim/slide_out_right"
+            app:popEnterAnim="@android:anim/slide_in_left"
+            app:popExitAnim="@android:anim/slide_out_right"/>
     </fragment>
 
     <fragment
@@ -62,9 +70,24 @@
         android:name="com.example.locket.ui.history.HistoryFragment"
         android:label="HistoryFragment"
         tools:layout="@layout/fragment_history">
+
         <action
             android:id="@+id/action_historyFragment_to_profileFragment"
             app:destination="@id/profileFragment" />
+
+        <action
+            android:id="@+id/action_historyFragment_to_conversationFragment"
+            app:destination="@id/conversationFragment"
+            app:enterAnim="@android:anim/slide_in_left"
+            app:exitAnim="@android:anim/slide_out_right"
+            app:popEnterAnim="@android:anim/slide_in_left"
+            app:popExitAnim="@android:anim/slide_out_right"/>
+
+        <action
+            android:id="@+id/action_historyFragment_to_loginFragment"
+            app:destination="@id/loginFragment"
+            app:popUpTo="@id/nav_graph"
+            app:popUpToInclusive="true" />
     </fragment>
 
     <fragment
@@ -77,12 +100,60 @@
             app:destination="@id/loginFragment"
             app:popUpTo="@id/nav_graph"
             app:popUpToInclusive="true" />
+
+        <action
+            android:id="@+id/action_profileFragment_to_conversationFragment"
+            app:destination="@id/conversationFragment"
+            app:enterAnim="@android:anim/slide_in_left"
+            app:exitAnim="@android:anim/slide_out_right"
+            app:popEnterAnim="@android:anim/slide_in_left"
+            app:popExitAnim="@android:anim/slide_out_right"/>
     </fragment>
 
     <fragment
         android:id="@+id/friendFragment"
         android:name="com.example.locket.ui.friend.FriendFragment"
         android:label="FriendFragment"
-        tools:layout="@layout/fragment_friend" />
+        tools:layout="@layout/fragment_friend">
+
+        <action
+            android:id="@+id/action_friendFragment_to_conversationFragment"
+            app:destination="@id/conversationFragment"
+            app:enterAnim="@android:anim/slide_in_left"
+            app:exitAnim="@android:anim/slide_out_right"
+            app:popEnterAnim="@android:anim/slide_in_left"
+            app:popExitAnim="@android:anim/slide_out_right"/>
+    </fragment>
+
+    <fragment
+        android:id="@+id/conversationFragment"
+        android:name="com.example.locket.ui.message.ConversationFragment"
+        android:label="ConversationFragment"
+        tools:layout="@layout/fragment_conversation">
+
+        <action
+            android:id="@+id/action_conversation_to_detail"
+            app:destination="@id/chatDetailFragment"
+            app:enterAnim="@android:anim/fade_in"
+            app:exitAnim="@android:anim/fade_out"
+            app:popEnterAnim="@android:anim/fade_in"
+            app:popExitAnim="@android:anim/fade_out"/>
+    </fragment>
+
+    <fragment
+        android:id="@+id/chatDetailFragment"
+        android:name="com.example.locket.ui.message.ChatDetailFragment"
+        android:label="ChatDetailFragment"
+        tools:layout="@layout/fragment_chat_detail">
+
+        <argument
+            android:name="conversationId"
+            app:argType="string"
+            app:nullable="true" />
+        <argument
+            android:name="receiverId"
+            app:argType="string"
+            app:nullable="true" />
+    </fragment>
 
 </navigation>

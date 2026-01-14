@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.locket.data.LocketApiService
 import com.example.locket.model.PictureData
+import com.example.locket.model.SendMessageRequest
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -46,6 +47,23 @@ class HistoryViewModel @Inject constructor(
                 e.printStackTrace()
             } finally {
                 _isLoading.value = false
+            }
+        }
+    }
+    fun sendMessage(receiverId: String, content: String, pictureId: String, onSuccess: () -> Unit) {
+        viewModelScope.launch {
+            try {
+                val request = SendMessageRequest(
+                    receiverId = receiverId,
+                    content = content,
+                    attachedPictureId = pictureId // Gắn ID ảnh để biết đang reply ảnh nào
+                )
+                val response = apiService.sendMessage(request)
+                if (response.isSuccessful && response.body()?.success == true) {
+                    onSuccess()
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
             }
         }
     }

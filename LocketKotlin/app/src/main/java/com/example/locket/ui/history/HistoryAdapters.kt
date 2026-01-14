@@ -23,12 +23,9 @@ class HistoryGridAdapter(
 
     override fun onBindViewHolder(holder: GridViewHolder, position: Int) {
         val item = getItem(position)
-        // Load ảnh vào ô Grid
         holder.binding.imgGrid.load(item.url) {
             crossfade(true)
         }
-
-        // Sự kiện Click
         holder.itemView.setOnClickListener {
             onItemClick(position)
         }
@@ -39,10 +36,13 @@ class HistoryGridAdapter(
 
 // --- DETAIL ADAPTER ---
 class HistoryDetailAdapter(
+    private val currentUserId: String,
     private val onSwitchToGrid: () -> Unit,
     private val onBackToCamera: () -> Unit,
     private val onNavigateToProfile: () -> Unit,
-    private val calculateTimeAgo: (String) -> String
+    private val onNavigateToChat: () -> Unit, // [MỚI] Callback chuyển màn hình chat
+    private val calculateTimeAgo: (String?) -> String,
+    private val onSendMessage: (String, String, String) -> Unit
 ) : ListAdapter<PictureData, HistoryDetailAdapter.DetailViewHolder>(PictureDiffCallback()) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): DetailViewHolder {
@@ -55,26 +55,40 @@ class HistoryDetailAdapter(
         with(holder.binding) {
             imgMain.load(item.url)
 
-            // Xử lý Time Stamp
-            val timeString = calculateTimeAgo(item.uploadAt) // Truyền thời gian từ model vào
+            val timeString = calculateTimeAgo(item.uploadAt)
             tvTimeAgo.text = timeString
-            tvTimeOverlay.text = timeString // Nếu bạn muốn overlay cũng hiện giống vậy
+            tvTimeOverlay.text = timeString
 
-            // Các thông tin khác
             tvUsername.text = item.uploader.username
             tvAvatar.text = item.uploader.username.take(1).uppercase()
 
-            // Ẩn hiện overlay nếu không có dữ liệu
             tvLocation.text = item.location ?: ""
             layoutLocation.isVisible = !item.location.isNullOrBlank()
 
             tvMessageOverlay.text = item.message
             tvMessageOverlay.isVisible = !item.message.isNullOrBlank()
 
-            // Click Events
+            // Logic Reply Box
+            if (item.uploader.id != currentUserId) {
+                layoutReply.isVisible = true
+                btnSendReply.setOnClickListener {
+                    val msg = etReply.text.toString().trim()
+                    if (msg.isNotEmpty()) {
+                        onSendMessage(item.uploader.id, msg, item.id)
+                        etReply.setText("")
+                    }
+                }
+            } else {
+                layoutReply.isVisible = false
+            }
+
+            // --- CLICK EVENTS ---
             btnSwitchToGrid.setOnClickListener { onSwitchToGrid() }
             btnBackToCamera.setOnClickListener { onBackToCamera() }
             btnProfile.setOnClickListener { onNavigateToProfile() }
+
+            // [MỚI] Bắt sự kiện nút Chat ở Header
+            btnChat.setOnClickListener { onNavigateToChat() }
         }
     }
 
